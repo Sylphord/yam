@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="en-GB" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f4ef">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#151a16">
   <title>Yam — Quote and payment tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
@@ -24,7 +24,7 @@
         </div>
         <div class="profile">
           <div class="profile-avatar" aria-hidden="true">JD</div>
-          <div><strong>Jamie Davies</strong><span>Independent tradesperson</span></div>
+          <div><strong>Jamie Davies</strong><span>Sample profile · tradesperson</span></div>
           <button class="icon-button profile-menu" type="button" aria-label="Profile options">···</button>
         </div>
       </div>
@@ -34,6 +34,9 @@
       <header class="topbar">
         <div class="mobile-brand"><span class="brand-mark">Y</span> yam<span class="brand-period">.</span></div>
         <p class="today" id="today-label"></p>
+        <button class="button button-theme" id="theme-toggle" type="button" aria-label="Switch to light theme">
+          <span class="theme-icon" aria-hidden="true">☼</span><span class="theme-label">Light theme</span>
+        </button>
         <button class="button button-primary top-new-quote" type="button" data-open-form><span aria-hidden="true">＋</span> New quote</button>
       </header>
 
@@ -45,6 +48,11 @@
         </div>
         <div class="welcome-decoration" aria-hidden="true"><span>£</span></div>
       </section>
+
+      <aside class="demo-notice" aria-label="Sample data notice">
+        <span class="demo-tag">DEMO DATA</span>
+        <p><strong>This is an example workspace.</strong> Jamie Davies, customer names, jobs and amounts are sample placeholders—not real customers or payments. New records are saved only in this browser.</p>
+      </aside>
 
       <section class="summary-grid" aria-label="Business summary">
         <article class="summary-card">
@@ -90,10 +98,11 @@
           </label>
         </div>
 
-        <div class="table-wrap">
+        <div class="table-wrap" role="region" aria-label="Quotes and invoices, scroll horizontally to view all columns" tabindex="0">
           <table>
+            <caption class="visually-hidden">Saved quotes and invoices for sample and user-created jobs.</caption>
             <thead>
-              <tr><th>Customer / job</th><th>Reference</th><th>Due date</th><th>Status</th><th class="amount-col">Amount</th><th><span class="visually-hidden">Actions</span></th></tr>
+              <tr><th scope="col">Customer / job</th><th scope="col">Reference</th><th scope="col">Due date</th><th scope="col">Status</th><th class="amount-col" scope="col">Amount</th><th scope="col">Actions</th></tr>
             </thead>
             <tbody id="work-list"></tbody>
           </table>

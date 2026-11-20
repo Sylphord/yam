@@ -1,6 +1,14 @@
 "use strict";
 
 const STORAGE_KEY = "yam-work-items-v1";
+const THEME_STORAGE_KEY = "yam-theme-v1";
+const SAMPLE_IDS = new Set(["YM-1042", "YM-1041", "YM-1040", "YM-1039"]);
+const SAMPLE_DUE_DAYS = new Map([
+  ["YM-1042", 5],
+  ["YM-1041", -2],
+  ["YM-1040", 8],
+  ["YM-1039", -12]
+]);
 const workList = document.querySelector("#work-list");
 const emptyState = document.querySelector("#empty-state");
 const dialog = document.querySelector("#quote-dialog");
@@ -8,14 +16,14 @@ const form = document.querySelector("#quote-form");
 const toast = document.querySelector("#toast");
 const searchInput = document.querySelector("#search-input");
 const statusFilter = document.querySelector("#status-filter");
-const dateInput = form.elements.dueDate;
+const themeToggle = document.querySelector("#theme-toggle");
 let toastTimer;
 
 const sampleItems = [
-  { id: "YM-1042", customer: "Alex Morgan", job: "Bathroom tap replacement", amount: 185, dueDate: "2026-11-25", status: "awaiting", createdAt: "2026-11-15" },
-  { id: "YM-1041", customer: "Olivia Reed", job: "Fence repair & new gate", amount: 420, dueDate: "2026-11-18", status: "awaiting", createdAt: "2026-11-12" },
-  { id: "YM-1040", customer: "Sam Patel", job: "Kitchen splashback tiling", amount: 675, dueDate: "2026-11-28", status: "quote", createdAt: "2026-11-11" },
-  { id: "YM-1039", customer: "Taylor Green", job: "Replace hallway light fittings", amount: 240, dueDate: "2026-11-08", status: "paid", createdAt: "2026-11-03" }
+  { id: "YM-1042", customer: "Alex Morgan", job: "Bathroom tap replacement", amount: 185, dueDate: localDate(addDays(5)), status: "awaiting", createdAt: localDate(addDays(-5)), isSample: true },
+  { id: "YM-1041", customer: "Olivia Reed", job: "Fence repair & new gate", amount: 420, dueDate: localDate(addDays(-2)), status: "awaiting", createdAt: localDate(addDays(-8)), isSample: true },
+  { id: "YM-1040", customer: "Sam Patel", job: "Kitchen splashback tiling", amount: 675, dueDate: localDate(addDays(8)), status: "quote", createdAt: localDate(addDays(-9)), isSample: true },
+  { id: "YM-1039", customer: "Taylor Green", job: "Replace hallway light fittings", amount: 240, dueDate: localDate(addDays(-12)), status: "paid", createdAt: localDate(addDays(-17)), paidAt: localDate(), isSample: true }
 ];
 
 function loadItems() {
@@ -26,7 +34,17 @@ function loadItems() {
     if (!Array.isArray(items) || !items.every(isWorkItem)) {
       throw new Error("Saved work data has an unexpected format.");
     }
-    return items;
+    return items.map(item => {
+      const isSample = item.isSample === true || SAMPLE_IDS.has(item.id);
+      return {
+        ...item,
+        ...(isSample && SAMPLE_DUE_DAYS.has(item.id)
+          ? { dueDate: localDate(addDays(SAMPLE_DUE_DAYS.get(item.id))) }
+          : {}),
+        ...(isSample && item.status === "paid" && !item.paidAt ? { paidAt: localDate() } : {}),
+        isSample
+      };
+    });
   } catch (error) {
     console.error("Could not load saved work:", error);
     showToast("Couldn’t load saved work. Check browser storage settings.");
@@ -42,7 +60,9 @@ function isWorkItem(item) {
     && typeof item.job === "string"
     && Number.isFinite(item.amount)
     && typeof item.dueDate === "string"
-    && ["quote", "awaiting", "paid"].includes(item.status);
+    && ["quote", "awaiting", "paid"].includes(item.status)
+    && (item.isSample === undefined || typeof item.isSample === "boolean")
+    && (item.paidAt === undefined || typeof item.paidAt === "string");
 }
 
 let items = loadItems();
@@ -134,6 +154,12 @@ function renderRows() {
     customerCell.className = "customer-cell";
     const customer = document.createElement("strong");
     customer.textContent = item.customer;
+    if (item.isSample) {
+      const sampleMark = document.createElement("span");
+      sampleMark.className = "sample-mark";
+      sampleMark.textContent = "Sample";
+      customer.append(sampleMark);
+    }
     const job = document.createElement("span");
     job.textContent = item.job;
     customerCell.append(customer, job);
@@ -206,6 +232,53 @@ function nextReference() {
   return `YM-${highest + 1}`;
 }
 
+function addDays(days) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
+function updateTheme(theme, persist = false) {
+  document.documentElement.dataset.theme = theme;
+  const themes = ["dark", "light", "grey"];
+  const nextTheme = themes[(themes.indexOf(theme) + 1) % themes.length];
+  const themeNames = { dark: "Dark", light: "Light", grey: "Grey" };
+  const themeIcons = { dark: "☾", light: "☼", grey: "◐" };
+  themeToggle.setAttribute("aria-label", `Switch to ${themeNames[nextTheme].toLowerCase()} theme`);
+  themeToggle.querySelector(".theme-icon").textContent = themeIcons[nextTheme];
+  themeToggle.querySelector(".theme-label").textContent = `${themeNames[nextTheme]} theme`;
+  document.querySelector('meta[name="theme-color"]').content = {
+    dark: "#151a16",
+    light: "#f5f4ef",
+    grey: "#4a4f4d"
+  }[theme];
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (error) {
+      console.error("Could not save theme preference:", error);
+      showToast("Theme changed, but the preference couldn’t be saved.");
+    }
+  }
+}
+
+try {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "grey") {
+    updateTheme(savedTheme);
+  }
+} catch (error) {
+  console.error("Could not read theme preference:", error);
+}
+
+themeToggle.addEventListener("click", () => {
+  const themes = ["dark", "light", "grey"];
+  const currentTheme = document.documentElement.dataset.theme;
+  const nextTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
+  updateTheme(nextTheme, true);
+});
+
 document.querySelector("#today-label").textContent = new Intl.DateTimeFormat("en-GB", {
   weekday: "short", day: "numeric", month: "short", year: "numeric"
 }).format(new Date());
@@ -231,22 +304,28 @@ form.addEventListener("submit", event => {
   const formData = new FormData(form);
   const amount = Number(formData.get("amount"));
   const dueDate = String(formData.get("dueDate"));
+  const customerName = String(formData.get("customer")).trim();
+  const jobDescription = String(formData.get("job")).trim();
+  const status = String(formData.get("status"));
   const error = document.querySelector("#form-error");
 
-  if (!Number.isFinite(amount) || amount <= 0 || !dueDate) {
-    error.textContent = "Enter a valid amount and due date.";
+  if (!customerName || !jobDescription || !Number.isFinite(amount) || amount <= 0
+    || !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)
+    || !["quote", "awaiting"].includes(status)) {
+    error.textContent = "Enter a customer, job, valid amount and due date.";
     error.hidden = false;
     return;
   }
 
   const newItem = {
     id: nextReference(),
-    customer: String(formData.get("customer")).trim(),
-    job: String(formData.get("job")).trim(),
+    customer: customerName,
+    job: jobDescription,
     amount,
     dueDate,
-    status: String(formData.get("status")),
-    createdAt: localDate()
+    status,
+    createdAt: localDate(),
+    isSample: false
   };
   items = [newItem, ...items];
   if (!saveItems()) {
