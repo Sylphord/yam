@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4ef">
+  <title>Yam — Quote and payment tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="Yam home"><span class="brand-mark">Y</span> yam<span class="brand-period">.</span></a>
+      <p class="side-label">WORKSPACE</p>
+      <nav class="navigation" aria-label="Main navigation">
+        <a class="nav-link active" href="#overview"><span aria-hidden="true">▦</span> Overview</a>
+        <a class="nav-link" href="#quotes"><span aria-hidden="true">▤</span> Quotes &amp; invoices</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-note">
+          <span class="note-icon" aria-hidden="true">✳</span>
+          <p>Less chasing.<br><strong>More getting paid.</strong></p>
+        </div>
+        <div class="profile">
+          <div class="profile-avatar" aria-hidden="true">JD</div>
+          <div><strong>Jamie Davies</strong><span>Independent tradesperson</span></div>
+          <button class="icon-button profile-menu" type="button" aria-label="Profile options">···</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark">Y</span> yam<span class="brand-period">.</span></div>
+        <p class="today" id="today-label"></p>
+        <button class="button button-primary top-new-quote" type="button" data-open-form><span aria-hidden="true">＋</span> New quote</button>
+      </header>
+
+      <section id="overview" class="welcome">
+        <div>
+          <p class="eyebrow">YOUR BUSINESS AT A GLANCE</p>
+          <h1>Good morning, Jamie <span aria-hidden="true">✳</span></h1>
+          <p class="welcome-copy">Here’s what’s happening with your work.</p>
+        </div>
+        <div class="welcome-decoration" aria-hidden="true"><span>£</span></div>
+      </section>
+
+      <section class="summary-grid" aria-label="Business summary">
+        <article class="summary-card">
+          <div class="summary-top"><span>Awaiting payment</span><span class="summary-icon amber" aria-hidden="true">↗</span></div>
+          <strong class="summary-amount" id="awaiting-total">£0</strong>
+          <span class="summary-foot"><span id="awaiting-count">0</span> invoices outstanding</span>
+        </article>
+        <article class="summary-card">
+          <div class="summary-top"><span>Overdue</span><span class="summary-icon rose" aria-hidden="true">!</span></div>
+          <strong class="summary-amount" id="overdue-total">£0</strong>
+          <span class="summary-foot"><span id="overdue-count">0</span> need a follow-up</span>
+        </article>
+        <article class="summary-card">
+          <div class="summary-top"><span>Paid this month</span><span class="summary-icon green" aria-hidden="true">✓</span></div>
+          <strong class="summary-amount" id="paid-total">£0</strong>
+          <span class="summary-foot"><span id="paid-count">0</span> payments received</span>
+        </article>
+      </section>
+
+      <section class="panel activity-panel" id="quotes">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">KEEP THINGS MOVING</p>
+            <h2>Quotes &amp; invoices</h2>
+          </div>
+          <button class="button button-primary desktop-new-quote" type="button" data-open-form><span aria-hidden="true">＋</span> New quote</button>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <span class="visually-hidden">Search quotes</span>
+            <input id="search-input" type="search" placeholder="Search customer or job…" autocomplete="off">
+          </label>
+          <label class="filter-label">
+            <span class="visually-hidden">Filter by status</span>
+            <select id="status-filter">
+              <option value="all">All work</option>
+              <option value="quote">Quotes</option>
+              <option value="awaiting">Awaiting payment</option>
+              <option value="paid">Paid</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Customer / job</th><th>Reference</th><th>Due date</th><th>Status</th><th class="amount-col">Amount</th><th><span class="visually-hidden">Actions</span></th></tr>
+            </thead>
+            <tbody id="work-list"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state" hidden>
+            <span class="empty-icon" aria-hidden="true">＋</span>
+            <h3>No work to show yet</h3>
+            <p>Add your first quote to keep track of the job and payment.</p>
+            <button class="button button-primary" type="button" data-open-form>Create a quote</button>
+          </div>
+        </div>
+        <p class="storage-note"><span aria-hidden="true">▣</span> Your information is saved on this device.</p>
+      </section>
+
+      <footer class="footer-note">Made for the people who make things work. <span>✳</span></footer>
+    </main>
+  </div>
+
+  <dialog class="quote-dialog" id="quote-dialog" aria-labelledby="dialog-title">
+    <form id="quote-form" class="quote-form">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">A LITTLE LESS ADMIN</p><h2 id="dialog-title">Add a quote</h2></div>
+        <button class="icon-button close-dialog" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="form-grid">
+        <label class="field full-width">Customer name
+          <input name="customer" required maxlength="80" placeholder="e.g. Alex Morgan">
+        </label>
+        <label class="field full-width">Job description
+          <input name="job" required maxlength="120" placeholder="e.g. Replace kitchen tap">
+        </label>
+        <label class="field">Amount (£)
+          <input name="amount" type="number" min="0.01" max="10000000" step="0.01" required placeholder="250.00">
+        </label>
+        <label class="field">Due date
+          <input name="dueDate" type="date" required>
+        </label>
+        <label class="field full-width">Starting status
+          <select name="status">
+            <option value="quote">Quote — not yet accepted</option>
+            <option value="awaiting">Invoice — awaiting payment</option>
+          </select>
+        </label>
+      </div>
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button button-quiet cancel-dialog" type="button">Cancel</button>
+        <button class="button button-primary" type="submit">Save quote</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
