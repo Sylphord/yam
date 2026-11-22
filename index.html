@@ -13,10 +13,10 @@
     <aside class="sidebar">
       <a class="brand" href="#" aria-label="Yam home"><span class="brand-mark">Y</span> yam<span class="brand-period">.</span></a>
       <p class="side-label">WORKSPACE</p>
-      <nav class="navigation" aria-label="Main navigation">
-        <a class="nav-link active" href="#overview"><span aria-hidden="true">▦</span> Overview</a>
-        <a class="nav-link" href="#quotes"><span aria-hidden="true">▤</span> Quotes &amp; invoices</a>
-      </nav>
+      <div class="navigation" role="tablist" aria-label="Workspace views">
+        <button class="nav-link" id="overview-tab" type="button" role="tab" aria-controls="overview-panel" aria-selected="true" tabindex="0"><span aria-hidden="true">▦</span> Overview</button>
+        <button class="nav-link" id="quotes-tab" type="button" role="tab" aria-controls="quotes-panel" aria-selected="false" tabindex="-1"><span aria-hidden="true">▤</span> Quotes &amp; invoices</button>
+      </div>
       <div class="sidebar-bottom">
         <div class="sidebar-note">
           <span class="note-icon" aria-hidden="true">✳</span>
@@ -40,7 +40,8 @@
         <button class="button button-primary top-new-quote" type="button" data-open-form><span aria-hidden="true">＋</span> New quote</button>
       </header>
 
-      <section id="overview" class="welcome">
+      <section class="tab-panel overview-panel" id="overview-panel" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
+      <section class="welcome">
         <div>
           <p class="eyebrow">YOUR BUSINESS AT A GLANCE</p>
           <h1>Good morning, Jamie <span aria-hidden="true">✳</span></h1>
@@ -71,8 +72,9 @@
           <span class="summary-foot"><span id="paid-count">0</span> payments received</span>
         </article>
       </section>
+      </section>
 
-      <section class="panel activity-panel" id="quotes">
+      <section class="panel activity-panel tab-panel" id="quotes-panel" role="tabpanel" aria-labelledby="quotes-tab" tabindex="0" hidden>
         <div class="panel-heading">
           <div>
             <p class="eyebrow">KEEP THINGS MOVING</p>

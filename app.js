@@ -17,6 +17,7 @@ const toast = document.querySelector("#toast");
 const searchInput = document.querySelector("#search-input");
 const statusFilter = document.querySelector("#status-filter");
 const themeToggle = document.querySelector("#theme-toggle");
+const tabs = [...document.querySelectorAll('[role="tab"]')];
 let toastTimer;
 
 const sampleItems = [
@@ -66,6 +67,33 @@ function isWorkItem(item) {
 }
 
 let items = loadItems();
+
+function activateTab(selectedTab) {
+  for (const tab of tabs) {
+    const isSelected = tab === selectedTab;
+    tab.setAttribute("aria-selected", String(isSelected));
+    tab.tabIndex = isSelected ? 0 : -1;
+    document.getElementById(tab.getAttribute("aria-controls")).hidden = !isSelected;
+  }
+}
+
+for (const tab of tabs) {
+  tab.addEventListener("click", () => activateTab(tab));
+  tab.addEventListener("keydown", event => {
+    const currentIndex = tabs.indexOf(tab);
+    let targetIndex;
+    if (event.key === "ArrowRight") targetIndex = (currentIndex + 1) % tabs.length;
+    else if (event.key === "ArrowLeft") targetIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    else if (event.key === "Home") targetIndex = 0;
+    else if (event.key === "End") targetIndex = tabs.length - 1;
+    else return;
+
+    event.preventDefault();
+    tabs[targetIndex].focus();
+  });
+}
+
+activateTab(tabs.find(tab => tab.getAttribute("aria-selected") === "true") || tabs[0]);
 
 function saveItems() {
   try {
@@ -250,7 +278,7 @@ function updateTheme(theme, persist = false) {
   document.querySelector('meta[name="theme-color"]').content = {
     dark: "#151a16",
     light: "#f5f4ef",
-    grey: "#4a4f4d"
+    grey: "#57534f"
   }[theme];
 
   if (persist) {
